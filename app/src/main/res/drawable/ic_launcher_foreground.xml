@@ -1,0 +1,34 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Green dotted straight line (Baseline) -->
+    <!-- From (22, 86) to (86, 22) -->
+    <path
+        android:pathData="M22,86 L86,22"
+        android:strokeColor="#B6D94A"
+        android:strokeWidth="4"
+        android:strokeLineCap="round" />
+
+    <!-- Orange oscillating line (Price) -->
+    <!-- Oscillating around the diagonal line y = 108 - x -->
+    <!-- Points calculated to be above and below the green line -->
+    <path
+        android:pathData="M22,86 L30,70 L38,82 L46,54 L54,66 L62,38 L70,50 L78,22 L86,22"
+        android:strokeColor="#F7931A"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Indicator dots at the end of the lines -->
+    <path
+        android:fillColor="#B6D94A"
+        android:pathData="M86,22m-3,0a3,3 0 1,1 6,0a3,3 0 1,1 -6,0" />
+
+    <path
+        android:fillColor="#F7931A"
+        android:pathData="M86,22m-2,0a2,2 0 1,1 4,0a2,2 0 1,1 -4,0" />
+
+</vector>
