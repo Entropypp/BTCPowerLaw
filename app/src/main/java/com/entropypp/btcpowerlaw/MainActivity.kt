@@ -151,7 +151,7 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
 
             Row(
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 0.dp)
                     .fillMaxWidth()
                     .height(IntrinsicSize.Min),
                 verticalAlignment = Alignment.CenterVertically
@@ -165,7 +165,7 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
                         .background(Color(0xFF121212))
                         .border(1.dp, Color.DarkGray, RoundedCornerShape(16.dp))
                         .clickable { showDatePicker = true }
-                        .padding(16.dp),
+                        .padding( vertical = 8.dp, horizontal = 16.dp),
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -206,7 +206,7 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color(0xFF121212))
                         .border(1.dp, Color.DarkGray, RoundedCornerShape(16.dp))
-                        .padding(20.dp),
+                        .padding( vertical = 8.dp, horizontal = 16.dp),
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -280,7 +280,7 @@ fun MetricsContent(metrics: BtcMetrics, selectedDate: LocalDate) {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(15.dp),
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // 2x2 Grid of Cards
