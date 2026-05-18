@@ -28,8 +28,8 @@ class DCAWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val prefs = context.getSharedPreferences("btc_widget_prefs", Context.MODE_PRIVATE)
-        val currentPrice = prefs.getFloat("currentPrice", 0f).toDouble()
-        val fairPrice = prefs.getFloat("fairPrice", 0f).toDouble()
+        val currentPrice = prefs.getLong("currentPrice", 0L).toDouble()
+        val fairPrice = prefs.getLong("fairPrice", 0L).toDouble()
 
         provideContent {
             DCAWidgetContent(currentPrice, fairPrice)
@@ -100,11 +100,11 @@ class DCAWidget : GlanceAppWidget() {
             // 1. Indicator Arrow (using Vector Drawable for full fill)
             Row(modifier = GlanceModifier.fillMaxWidth().height(16.dp)) {
                 val activeIndex = when {
-                    ratioToFair <= 0.42 -> 0
-                    ratioToFair <= 0.60 -> 1
+                    ratioToFair <= 0.42 -> 4
+                    ratioToFair <= 0.60 -> 3
                     ratioToFair <= 0.75 -> 2
-                    ratioToFair <= 1.00 -> 3
-                    else -> 4
+                    ratioToFair <= 1.00 -> 1
+                    else -> 0
                 }
                 for (i in 0 until 5) {
                     Box(
@@ -131,11 +131,11 @@ class DCAWidget : GlanceAppWidget() {
             )
             Row(modifier = GlanceModifier.fillMaxWidth().height(20.dp).cornerRadius(4.dp)) {
                 val bands = listOf(
-                    Band(green,"5X"),
-                    Band(lime,"4X"),
-                    Band(yellow,"3X"),
+                    Band(red,"1X"),
                     Band(orange,"2X"),
-                    Band(red,"1X")
+                    Band(yellow,"3X"),
+                    Band(lime,"4X"),
+                    Band(green,"5X")
                 )
                 bands.forEach { band ->
                     Box(
@@ -159,27 +159,6 @@ class DCAWidget : GlanceAppWidget() {
                     }
                 }
             }
-            //  Ticks and Labels (Matching centers of the 5 segments)
-            /*Row(modifier = GlanceModifier.fillMaxWidth().height(24.dp)) {
-                val ticks = listOf("5X", "4X", "3X", "2X", "1X")
-                ticks.forEach { tick ->
-                    Box(
-                        modifier = GlanceModifier
-                            .defaultWeight()
-                            .fillMaxHeight(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = tick,
-                            style = TextStyle(
-                                color = grey,
-                                fontSize = 18.sp,
-                                textAlign = TextAlign.Center
-                            )
-                        )
-                    }
-                }
-            }*/
         }
     }
 }

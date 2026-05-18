@@ -83,14 +83,14 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
 
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            initialSelectedDateMillis = selectedDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
         )
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let {
-                        val date = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
+                        val date = Instant.ofEpochMilli(it).atZone(ZoneId.of("UTC")).toLocalDate()
                         viewModel.onDateSelected(date)
                     }
                     showDatePicker = false
@@ -444,10 +444,10 @@ fun FearAndGreedCard(
 
         // 1. Indicator Arrow (Linear Mapping 0-100 using sentiment ranges)
         val activeBox = when {
-            index <= 24 -> 0
+            index <= 25 -> 0
             index <= 46 -> 1
-            index <= 49 -> 2
-            index <= 74 -> 3
+            index <= 54 -> 2
+            index <= 75 -> 3
             else -> 4
         }
         val offsetInBox = when (activeBox) {
@@ -493,11 +493,11 @@ fun FearAndGreedCard(
                 .clip(RoundedCornerShape(4.dp))
         ) {
             val bands = listOf(
-                red to if (index in 0..24) "$index" else "0-24",
-                orange to if (index in 25..46) "$index" else "25-46",
-                yellow to if (index in 47..49) "$index" else "47-49",
-                lime to if (index in 50..74) "$index" else "50-74",
-                green to if (index in 75..100) "$index" else "75-100"
+                red to if (index in 0..24) "$index" else "0-25",
+                orange to if (index in 25..46) "$index" else "26-46",
+                yellow to if (index in 47..49) "$index" else "47-54",
+                lime to if (index in 50..74) "$index" else "55-75",
+                green to if (index in 75..100) "$index" else "76-100"
             )
             bands.forEach { (bandColor, bandLabel) ->
                 Box(
@@ -586,11 +586,11 @@ fun DCAAccumulationCard(
 
         // 1. Indicator Arrow (Positional mapping)
         val activeIndex = when {
-            ratioToFair <= 0.42 -> 0
-            ratioToFair <= 0.60 -> 1
+            ratioToFair <= 0.42 -> 4
+            ratioToFair <= 0.60 -> 3
             ratioToFair <= 0.75 -> 2
-            ratioToFair <= 1.00 -> 3
-            else -> 4
+            ratioToFair <= 1.00 -> 1
+            else -> 0
         }
         Row(modifier = Modifier.fillMaxWidth().height(16.dp)) {
             for (i in 0 until 5) {
@@ -622,11 +622,11 @@ fun DCAAccumulationCard(
                 .clip(RoundedCornerShape(4.dp))
         ) {
             val bands = listOf(
-                green to "5X",
-                lime to "4X",
-                yellow to "3X",
+                red to "1X",
                 orange to "2X",
-                red to "1X"
+                yellow to "3X",
+                lime to "4X",
+                green to "5X"
             )
             bands.forEach { (bandColor, bandLabel) ->
                 Box(

@@ -26,7 +26,7 @@ class BTCFearAndGreedWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val prefs = context.getSharedPreferences("btc_widget_prefs", Context.MODE_PRIVATE)
         val fearAndGreedIndex = prefs.getInt("fearAndGreedIndex", 0)
-        val currentPrice = prefs.getFloat("currentPrice", 0f).toDouble()
+        val currentPrice = prefs.getLong("currentPrice", 0L).toDouble()
 
         provideContent {
             FearAndGreedContent(fearAndGreedIndex, currentPrice)
@@ -49,10 +49,10 @@ class BTCFearAndGreedWidget : GlanceAppWidget() {
 
 
         val (fngLabel, fngColor) = when {
-            index <= 24 -> "EXTREME FEAR [$index]" to red
+            index <= 25 -> "EXTREME FEAR [$index]" to red
             index <= 46 -> "FEAR [$index]" to orange
-            index <= 49 -> "NEUTRAL [$index]" to yellow
-            index <= 74 -> "GREED [$index]" to lime
+            index <= 54 -> "NEUTRAL [$index]" to yellow
+            index <= 75 -> "GREED [$index]" to lime
             else -> "EXTREME GREED [$index]" to green
         }
 
@@ -147,11 +147,11 @@ class BTCFearAndGreedWidget : GlanceAppWidget() {
             )
             Row(modifier = GlanceModifier.fillMaxWidth().height(20.dp).cornerRadius(4.dp)) {
                 val bands = listOf(
-                    Band(red, if (index in 0..24) "$index" else "0-24"),
-                    Band(orange, if (index in 25..46) "$index" else "25-46"),
-                    Band(yellow, if (index in 47..49) "$index" else "47-49"),
-                    Band(lime, if (index in 50..74) "$index" else "50-74"),
-                    Band(green, if (index in 75..100) "$index" else "75-100")
+                    Band(red, if (index in 0..24) "$index" else "0-25"),
+                    Band(orange, if (index in 25..46) "$index" else "26-46"),
+                    Band(yellow, if (index in 47..49) "$index" else "47-54"),
+                    Band(lime, if (index in 50..74) "$index" else "55-75"),
+                    Band(green, if (index in 75..100) "$index" else "76-100")
                 )
                 bands.forEach { band ->
                     Box(
