@@ -7,6 +7,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.*
+import androidx.glance.action.clickable
+import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.SizeMode
@@ -29,15 +31,16 @@ class BTCPriceWidget : GlanceAppWidget() {
         val prefs = context.getSharedPreferences("btc_widget_prefs", Context.MODE_PRIVATE)
         val currentPrice = prefs.getLong("currentPrice", 0L).toDouble()
         val fairPrice = prefs.getLong("fairPrice", 0L).toDouble()
+        val fearAndGreedIndex = prefs.getInt("fearAndGreedIndex", 0)
 
         provideContent {
-            PriceWidgetContent(currentPrice, fairPrice)
+            PriceWidgetContent(currentPrice, fairPrice, fearAndGreedIndex)
         }
     }
 
     @SuppressLint("RestrictedApi")
     @Composable
-    private fun PriceWidgetContent(currentPrice: Double, fairPrice: Double) {
+    private fun PriceWidgetContent(currentPrice: Double, fairPrice: Double, fearAndGreedIndex: Int) {
         val ratioToFair = if (fairPrice > 0) currentPrice / fairPrice else 1.0
         val green = ColorProvider(R.color.green)
         val lime = ColorProvider(R.color.lime)
@@ -46,12 +49,19 @@ class BTCPriceWidget : GlanceAppWidget() {
         val red = ColorProvider(R.color.red)
 
         val (buyLabel, buyColor) = when {
-            ratioToFair <= 0.42 -> "EXTREME BUY [5X]" to green
-            ratioToFair <= 0.60 -> "STRONG BUY [4X]" to lime
-            ratioToFair <= 0.75 -> "BUY [3X]" to yellow
-            ratioToFair <= 1.00 -> "FAIR VALUE [2X]" to orange
-            ratioToFair <= 1.50 -> "OVERVALUED [1X]" to red
-            else -> "OVERBOUGHT [1X]" to red
+            ratioToFair <= 0.42 -> "EXTREME BUY [%.2f]".format(ratioToFair) to green
+            ratioToFair <= 0.60 -> "STRONG BUY [%.2f]".format(ratioToFair) to lime
+            ratioToFair <= 0.75 -> "BUY [%.2f]".format(ratioToFair) to yellow
+            ratioToFair <= 1.00 -> "FAIR VALUE [%.2f]".format(ratioToFair) to orange
+            else -> "OVERVALUED [%.2f]".format(ratioToFair) to red
+        }
+
+        val (fngLabel, fngColor) = when {
+            fearAndGreedIndex <= 25 -> "EXTREME FEAR [$fearAndGreedIndex]" to red
+            fearAndGreedIndex <= 46 -> "FEAR [$fearAndGreedIndex]" to orange
+            fearAndGreedIndex <= 54 -> "NEUTRAL [$fearAndGreedIndex]" to yellow
+            fearAndGreedIndex <= 75 -> "GREED [$fearAndGreedIndex]" to lime
+            else -> "EXTREME GREED [$fearAndGreedIndex]" to green
         }
 
         val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US).apply {
@@ -64,20 +74,12 @@ class BTCPriceWidget : GlanceAppWidget() {
                 .fillMaxSize()
                 .background(Color(0xFF121212))
                 .cornerRadius(12.dp)
-                .padding(4.dp),
+                .padding(4.dp)
+                .clickable(actionRunCallback<RefreshAction>()),
             verticalAlignment = Alignment.CenterVertically,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = price,
-                style = TextStyle(
-                    color = ColorProvider(BtcOrange),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-            )
-            Spacer(modifier = GlanceModifier.height(2.dp))
+
             Text(
                 text = buyLabel,
                 style = TextStyle(
@@ -88,6 +90,28 @@ class BTCPriceWidget : GlanceAppWidget() {
                 ),
                 maxLines = 1
             )
+            Spacer(modifier = GlanceModifier.height(1.dp))
+            Text(
+                text = price,
+                style = TextStyle(
+                    color = ColorProvider(BtcOrange),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            )
+            Spacer(modifier = GlanceModifier.height(1.dp))
+            Text(
+                text = fngLabel,
+                style = TextStyle(
+                    color = fngColor,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                ),
+                maxLines = 1
+            )
+
         }
     }
 }

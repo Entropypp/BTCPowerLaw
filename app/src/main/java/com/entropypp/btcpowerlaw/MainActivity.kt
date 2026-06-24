@@ -20,6 +20,7 @@ import androidx.glance.unit.ColorProvider
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -360,12 +361,11 @@ fun MetricsContent(metrics: BtcMetrics, selectedDate: LocalDate) {
         val ratioToFair = if (effectiveFairPrice > 0) metrics.currentPrice / effectiveFairPrice else 1.0
 
         val (buyLabel, buyDefaultColor) = when {
-            ratioToFair <= 0.42 -> "EXTREME BUY [5X]" to green
-            ratioToFair <= 0.60 -> "STRONG BUY [4X]" to lime
-            ratioToFair <= 0.75 -> "BUY [3X]" to yellow
-            ratioToFair <= 1.00 -> "FAIR VALUE [2X]" to orange
-            ratioToFair <= 1.50 -> "OVERVALUED [1X]" to red
-            else -> "OVER BOUGHT" to red
+            ratioToFair <= 0.42 -> "EXTREME BUY [%.2f]".format(ratioToFair) to green
+            ratioToFair <= 0.60 -> "STRONG BUY [%.2f]".format(ratioToFair) to lime
+            ratioToFair <= 0.75 -> "BUY [%.2f]".format(ratioToFair) to yellow
+            ratioToFair <= 1.00 -> "FAIR VALUE [%.2f]".format(ratioToFair) to orange
+            else -> "OVERVALUED [%.2f]".format(ratioToFair) to red
         }
         val buyColor = if (isFuture) grey else buyDefaultColor
 
@@ -559,7 +559,7 @@ fun DCAAccumulationCard(
         // Header Row: Title and Rating Label
         Row(modifier = Modifier.fillMaxWidth().height(26.dp)){
             Text(
-                text = "DCA ACCUMULATION",
+                text = "FAIR VALUE RATIO",
                 modifier = Modifier.weight(1f),
                 style = TextStyle(
                     color = Color.Gray,
@@ -584,33 +584,29 @@ fun DCAAccumulationCard(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // 1. Indicator Arrow (Positional mapping)
-        val activeIndex = when {
-            ratioToFair <= 0.42 -> 4
-            ratioToFair <= 0.60 -> 3
-            ratioToFair <= 0.75 -> 2
-            ratioToFair <= 1.00 -> 1
-            else -> 0
-        }
-        Row(modifier = Modifier.fillMaxWidth().height(16.dp)) {
-            for (i in 0 until 5) {
-                Box(
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    contentAlignment =  Alignment.Center
-                ) {
-                    if (i == activeIndex) {
-                        // In App UI we use a simple Canvas for the arrow or an Icon
-                        Canvas(modifier = Modifier.size(16.dp)) {
-                            val path = androidx.compose.ui.graphics.Path().apply {
-                                moveTo(size.width / 2, size.height)
-                                lineTo(0f, 0f)
-                                lineTo(size.width, 0f)
-                                close()
-                            }
-                            drawPath(path, Color(0xFF888888))
-                        }
-                    }
+        // 1. Indicator Arrow (Piecewise linear mapping for accurate positioning)
+        val progress = when {
+            ratioToFair >= 1.0 -> 0.2f * ((1.1 - ratioToFair) / 0.1).toFloat()
+            ratioToFair >= 0.75 -> 0.2f + 0.2f * ((1.0 - ratioToFair) / 0.25).toFloat()
+            ratioToFair >= 0.60 -> 0.4f + 0.2f * ((0.75 - ratioToFair) / 0.15).toFloat()
+            ratioToFair >= 0.42 -> 0.6f + 0.2f * ((0.60 - ratioToFair) / 0.18).toFloat()
+            else -> 0.8f + 0.2f * ((0.42 - ratioToFair) / 0.12).toFloat()
+        }.coerceIn(0f, 1f)
+
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth().height(16.dp)) {
+            val fullWidth = maxWidth
+            Canvas(
+                modifier = Modifier
+                    .size(16.dp)
+                    .offset(x = (fullWidth * progress) - 8.dp)
+            ) {
+                val path = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(size.width / 2, size.height)
+                    lineTo(0f, 0f)
+                    lineTo(size.width, 0f)
+                    close()
                 }
+                drawPath(path, Color(0xFF888888))
             }
         }
 
@@ -621,12 +617,13 @@ fun DCAAccumulationCard(
                 .height(24.dp)
                 .clip(RoundedCornerShape(4.dp))
         ) {
+            val formattedRatio = "%.2f".format(ratioToFair)
             val bands = listOf(
-                red to "1X",
-                orange to "2X",
-                yellow to "3X",
-                lime to "4X",
-                green to "5X"
+                red to if (ratioToFair > 1.0) formattedRatio else "> 1.0",
+                orange to if (ratioToFair <= 1.0 && ratioToFair > 0.75) formattedRatio else "0.75-1.0",
+                yellow to if (ratioToFair <= 0.75 && ratioToFair > 0.60) formattedRatio else "0.6-0.75",
+                lime to if (ratioToFair <= 0.60 && ratioToFair > 0.42) formattedRatio else "0.42-0.6",
+                green to if (ratioToFair <= 0.42) formattedRatio else "< 0.42"
             )
             bands.forEach { (bandColor, bandLabel) ->
                 Box(

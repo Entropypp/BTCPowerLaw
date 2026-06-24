@@ -6,6 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.*
+import androidx.glance.action.clickable
+import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.SizeMode
@@ -65,7 +67,8 @@ class BTCFearAndGreedWidget : GlanceAppWidget() {
                 .fillMaxSize()
                 .background(black)
                 .cornerRadius(10.dp)
-                .padding(10.dp),
+                .padding(10.dp)
+                .clickable(actionRunCallback<RefreshAction>()),
             verticalAlignment = Alignment.Top,
             horizontalAlignment = Alignment.Start
         ) {
