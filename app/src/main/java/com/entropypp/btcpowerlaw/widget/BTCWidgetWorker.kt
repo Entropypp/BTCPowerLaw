@@ -33,8 +33,6 @@ class BTCWidgetWorker(
             // Save metrics to DataStore or SharedPreferences for the widget to read
             saveMetrics(metrics)
             
-            DCAWidget().updateAll(context)
-            BTCFearAndGreedWidget().updateAll(context)
             BTCPriceWidget().updateAll(context)
             Result.success()
         } catch (e: Exception) {

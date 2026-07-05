@@ -37,30 +37,6 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/btc_price_widget_info" />
         </receiver>
-
-        <receiver
-            android:name=".widget.DCAWidgetReceiver"
-            android:exported="true"
-            android:label="BTC DCA Widget">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/btc_price_widget_info" />
-        </receiver>
-
-        <receiver
-            android:name=".widget.BTCFearAndGreedWidgetReceiver"
-            android:exported="true"
-            android:label="BTC Fear and Greed Widget">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/btc_fear_and_greed_widget_info" />
-        </receiver>
     </application>
 
 </manifest>

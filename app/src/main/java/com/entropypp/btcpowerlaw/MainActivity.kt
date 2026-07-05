@@ -318,8 +318,8 @@ fun MetricsContent(metrics: BtcMetrics, selectedDate: LocalDate) {
             )
             Spacer(modifier = Modifier.width(16.dp))
             MetricCard(
-                label = "FLOOR [0.5X]",
-                value = currencyFormatter.format(metrics.fairPrice * 0.5),
+                label = "FLOOR [0.398X]",
+                value = currencyFormatter.format(metrics.fairPrice * 0.398),
                 color = green,
                 modifier = Modifier.weight(1f)
             )
@@ -329,17 +329,27 @@ fun MetricsContent(metrics: BtcMetrics, selectedDate: LocalDate) {
 
         Row(modifier = Modifier.fillMaxWidth()) {
             MetricCard(
-                label = "CEILING [2X]",
-                value = currencyFormatter.format(metrics.fairPrice * 2.0),
+                label = "CEILING [2.512X]",
+                value = currencyFormatter.format(metrics.fairPrice * 2.512),
                 color = red,
                 modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(16.dp))
+            val drawdownColor = when {
+                isFuture -> grey
+                metrics.drawdown <= 5.0 -> green
+                metrics.drawdown <= 10.0 -> lime
+                metrics.drawdown <= 20.0 -> yellow
+                metrics.drawdown <= 30.0 -> orange
+                else -> red
+            }
+
             MetricCard(
-                label = "OVEREXTENDED [3X]",
-                value = currencyFormatter.format(metrics.fairPrice * 3.0),
-                color = purple,
-                modifier = Modifier.weight(1f)
+                label = "DRAWDOWN",
+                value = "%.2f".format(metrics.drawdown),
+                color = drawdownColor,
+                modifier = Modifier.weight(1f),
+                prefix = "%"
             )
         }
 
@@ -361,7 +371,7 @@ fun MetricsContent(metrics: BtcMetrics, selectedDate: LocalDate) {
         val ratioToFair = if (effectiveFairPrice > 0) metrics.currentPrice / effectiveFairPrice else 1.0
 
         val (buyLabel, buyDefaultColor) = when {
-            ratioToFair <= 0.42 -> "EXTREME BUY [%.2f]".format(ratioToFair) to green
+            ratioToFair <= 0.398 -> "EXTREME BUY [%.2f]".format(ratioToFair) to green
             ratioToFair <= 0.60 -> "STRONG BUY [%.2f]".format(ratioToFair) to lime
             ratioToFair <= 0.75 -> "BUY [%.2f]".format(ratioToFair) to yellow
             ratioToFair <= 1.00 -> "FAIR VALUE [%.2f]".format(ratioToFair) to orange
@@ -674,9 +684,13 @@ fun MetricCard(label: String, value: String, color: Color, modifier: Modifier = 
             fontWeight = FontWeight.Bold,
             fontSize = 12.sp
         )
+        var text = "$prefix${value.replace("$", "")}"
+        if (prefix == "%") {
+            text = "${value.replace("%", "")} $prefix"
+        }
         Spacer(modifier = Modifier.height(10.dp))
         Text(
-            text = "$prefix${value.replace("$", "")}",
+            text = text,
             style = MaterialTheme.typography.headlineMedium,
             color = color,
             fontFamily = RajdhaniFontFamily,
@@ -695,6 +709,7 @@ fun MetricsPreview() {
                 currentPrice = 69195.0,
                 ath = 126080.0,
                 fairPrice = 131104.0,
+                drawdown = 45.12,
                 topZonePrice = 98327.0,
                 floorPrice = 55064.0,
                 fearAndGreedIndex = 13,

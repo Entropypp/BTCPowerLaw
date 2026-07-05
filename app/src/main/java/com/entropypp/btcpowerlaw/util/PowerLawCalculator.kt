@@ -22,7 +22,7 @@ object PowerLawCalculator {
     }
 
     fun calculateFloorPrice(fairPrice: Double): Double {
-        return fairPrice * 0.42
+        return fairPrice * 0.398
     }
 
     fun calculateFloorPrice(date: LocalDate = LocalDate.now()): Double {

@@ -6,6 +6,7 @@ import com.entropypp.btcpowerlaw.data.model.RecommendedFees
 import com.entropypp.btcpowerlaw.data.model.MempoolPrices
 import com.entropypp.btcpowerlaw.data.model.MempoolHistoricalPriceResponse
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface CoinGeckoApi {
@@ -37,6 +38,11 @@ interface MempoolApi {
 
     @GET("api/blocks/tip/height")
     suspend fun getBlockHeight(): Long
+
+    @GET("api/block/at-timestamp/{timestamp}")
+    suspend fun getBlockHeightAtTimestamp(
+        @Path("timestamp") timestamp: Long
+    ): Long
 
     @GET("api/v1/prices")
     suspend fun getCurrentPrice(): MempoolPrices

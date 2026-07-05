@@ -49,7 +49,6 @@ class BtcRepository(
         val fngDeferred = async { 
             try { 
                 if (date.isBefore(today)) {
-                    // Fetch a larger range and filter locally as specific date queries can be unreliable
                     fearAndGreedApi.getFearAndGreed(limit = 0) 
                 } else {
                     fearAndGreedApi.getFearAndGreed(limit = 1)
@@ -89,9 +88,27 @@ class BtcRepository(
             }
         }
 
+        val feesRes = feesDeferred.await()
+        val blockHeight = blockHeightDeferred.await()
+        val priceRes = priceDeferred.await()
+
         val fngResRaw = fngDeferred.await()
         val marketDataRes = marketDataDeferred.await()?.firstOrNull()
         
+        val ath = if (marketDataRes?.ath != null && marketDataRes.ath > 0) marketDataRes.ath else getPersistedAth()
+
+        val displayPrice = when (priceRes) {
+            is MempoolPrices -> priceRes.usd
+            is MempoolHistoricalPriceResponse -> priceRes.prices.firstOrNull()?.usd ?: 0.0
+            else -> 0.0
+        }
+
+        val drawdown = if (ath > 0) {
+            ((ath - displayPrice) / ath) * 100.0
+        } else {
+            0.0
+        }
+
         val fngRes = if (date.isBefore(today)) {
             fngResRaw?.data?.find { item ->
                 try {
@@ -107,16 +124,6 @@ class BtcRepository(
             fngResRaw?.data?.firstOrNull()
         }
 
-        val feesRes = feesDeferred.await()
-        val blockHeight = blockHeightDeferred.await()
-        val priceRes = priceDeferred.await()
-
-        val displayPrice = when (priceRes) {
-            is MempoolPrices -> priceRes.usd
-            is MempoolHistoricalPriceResponse -> priceRes.prices.firstOrNull()?.usd ?: 0.0
-            else -> 0.0
-        }
-
         val fairPrice = PowerLawCalculator.calculateFairPrice(date)
         val topZonePrice = PowerLawCalculator.calculateAccumuloTopZone(fairPrice)
         val floorPrice = PowerLawCalculator.calculateFloorPrice(date)
@@ -129,8 +136,9 @@ class BtcRepository(
 
         BtcMetrics(
             currentPrice = displayPrice,
-            ath = if (marketDataRes?.ath != null && marketDataRes.ath > 0) marketDataRes.ath else getPersistedAth(),
+            ath = ath,
             fairPrice = fairPrice,
+            drawdown = drawdown,
             topZonePrice = topZonePrice,
             floorPrice = floorPrice,
             fearAndGreedIndex = fngRes?.value?.toIntOrNull() ?: 50,
