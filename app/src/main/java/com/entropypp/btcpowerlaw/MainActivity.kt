@@ -286,18 +286,13 @@ fun MetricsContent(metrics: BtcMetrics, selectedDate: LocalDate) {
     ) {
         // 2x2 Grid of Cards
         Row(modifier = Modifier.fillMaxWidth()) {
-
-
-            val actualPriceValue = metrics.currentPrice
-            val actualPriceColor = if (isFuture) grey else orange
-            val actualPriceLabel = "ACTUAL PRICE"
-            
             MetricCard(
-                label = actualPriceLabel,
-                value = currencyFormatter.format(actualPriceValue),
-                color = actualPriceColor,
+                label = "FAIR VALUE",
+                value = currencyFormatter.format(metrics.fairPrice),
+                color = blue,
                 modifier = Modifier.weight(1f)
             )
+
             Spacer(modifier = Modifier.width(16.dp))
             MetricCard(
                 label = "ALL TIME HIGH",
@@ -311,16 +306,21 @@ fun MetricsContent(metrics: BtcMetrics, selectedDate: LocalDate) {
         
         Row(modifier = Modifier.fillMaxWidth()) {
             MetricCard(
-                label = "FAIR VALUE",
-                value = currencyFormatter.format(metrics.fairPrice),
-                color = blue,
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            MetricCard(
                 label = "FLOOR [0.398X]",
                 value = currencyFormatter.format(metrics.fairPrice * 0.398),
                 color = green,
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+
+            val actualPriceValue = metrics.currentPrice
+            val actualPriceColor = if (isFuture) grey else orange
+            val actualPriceLabel = "ACTUAL PRICE"
+
+            MetricCard(
+                label = actualPriceLabel,
+                value = currencyFormatter.format(actualPriceValue),
+                color = actualPriceColor,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -358,10 +358,10 @@ fun MetricsContent(metrics: BtcMetrics, selectedDate: LocalDate) {
         // Fear & Greed Card calculations
         val index = metrics.fearAndGreedIndex
         val (fngLabel, fngDefaultColor) = when {
-            index <= 24 -> "EXTREME FEAR [$index]" to red
+            index <= 25 -> "EXTREME FEAR [$index]" to red
             index <= 46 -> "FEAR [$index]" to orange
-            index <= 49 -> "NEUTRAL [$index]" to yellow
-            index<= 74 -> "GREED [$index]" to lime
+            index <= 54 -> "NEUTRAL [$index]" to yellow
+            index<= 75 -> "GREED [$index]" to lime
             else -> "EXTREME GREED [$index]" to green
         }
         val fngColor = if (isFuture) Color.Gray else fngDefaultColor
@@ -461,7 +461,7 @@ fun FearAndGreedCard(
             else -> 4
         }
         val offsetInBox = when (activeBox) {
-            0 -> index.toFloat() / 24f
+            0 -> index.toFloat() / 25f
             1 -> (index - 25).toFloat() / (46f - 25f)
             2 -> (index - 47).toFloat() / (49f - 47f)
             3 -> (index - 50).toFloat() / (74f - 50f)
@@ -503,11 +503,11 @@ fun FearAndGreedCard(
                 .clip(RoundedCornerShape(4.dp))
         ) {
             val bands = listOf(
-                red to if (index in 0..24) "$index" else "0-25",
-                orange to if (index in 25..46) "$index" else "26-46",
-                yellow to if (index in 47..49) "$index" else "47-54",
-                lime to if (index in 50..74) "$index" else "55-75",
-                green to if (index in 75..100) "$index" else "76-100"
+                red to if (index in 0..25) "$index" else "0-25",
+                orange to if (index in 26..46) "$index" else "26-46",
+                yellow to if (index in 47..54) "$index" else "47-54",
+                lime to if (index in 55..75) "$index" else "55-75",
+                green to if (index in 76..100) "$index" else "76-100"
             )
             bands.forEach { (bandColor, bandLabel) ->
                 Box(
