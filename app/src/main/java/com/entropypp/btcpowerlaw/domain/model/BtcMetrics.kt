@@ -4,6 +4,7 @@ data class BtcMetrics(
     val currentPrice: Double,
     val ath: Double,
     val fairPrice: Double,
+    val drawdown: Double,
     val topZonePrice: Double,
     val floorPrice: Double,
     val fearAndGreedIndex: Int,

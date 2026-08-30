@@ -1,6 +1,9 @@
 package com.entropypp.btcpowerlaw.widget
 
 import android.content.Context
+import androidx.glance.GlanceId
+import androidx.glance.action.ActionParameters
+import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.updateAll
 import androidx.work.*
 import com.entropypp.btcpowerlaw.data.BtcRepository
@@ -18,15 +21,18 @@ class BTCWidgetWorker(
             val repository = BtcRepository(
                 RetrofitClient.coinGeckoApi,
                 RetrofitClient.fearAndGreedApi,
-                RetrofitClient.mempoolApi
+                RetrofitClient.mempoolApi,
+                context
             )
             val metrics = repository.getBtcMetrics()
-            
+
+            if (metrics.currentPrice <= 0) {
+                return Result.retry()
+            }
+
             // Save metrics to DataStore or SharedPreferences for the widget to read
             saveMetrics(metrics)
             
-            DCAWidget().updateAll(context)
-            BTCFearAndGreedWidget().updateAll(context)
             BTCPriceWidget().updateAll(context)
             Result.success()
         } catch (e: Exception) {
@@ -76,6 +82,16 @@ class BTCWidgetWorker(
                 .build()
             WorkManager.getInstance(context).enqueue(request)
         }
+    }
+}
+
+class RefreshAction : ActionCallback {
+    override suspend fun onAction(
+        context: Context,
+        glanceId: GlanceId,
+        parameters: ActionParameters
+    ) {
+        BTCWidgetWorker.enqueueImmediate(context)
     }
 }
 
